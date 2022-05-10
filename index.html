@@ -1,327 +1,346 @@
 <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<html lang="en">
 
-        <!--=============== FAVICON ===============-->
-        <link rel="shortcut icon" href="assets/img/favicon.png" type="image/x-icon">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
 
-        <!--=============== REMIX ICONS ===============-->
-        <link href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css" rel="stylesheet">
+<body>
+    <h3>ABKezelő</h3>
+    <p>
+        using System.Data.SqlClient;
+        using System.Configuration;
+        using System.Drawing;
+    </p>
+    <p>
+        public static void Csatlakozas()
+        {
+        try
+        {
+        kapcsolat = new SqlConnection();
+        kapcsolat.ConnectionString = ConfigurationManager.ConnectionStrings["ConStr"].ConnectionString;
+        kapcsolat.Open();
 
-        <!--=============== CSS ===============-->
-        <link rel="stylesheet" href="assets/css/styles.css">
+        parancs = new SqlCommand();
+        parancs.Connection = kapcsolat;
+        }
+        catch (Exception ex)
+        {
+        throw new ABKivetel("Sikertelen csatlakozas!", ex);
+        }
+        }
+    </p>
+    <p>
+        public static void Lecsatlakozas()
+        {
+        try
+        {
+        kapcsolat.Close();
+        parancs.Dispose();
+        }
+        catch (Exception ex)
+        {
+        throw new ABKivetel("Sikertelen lecsatlakozas!", ex);
+        }
+        }
+    </p>
 
-        <title>Demo</title>
-    </head>
-    <body>
-        <!--=============== HEADER ===============-->
-        <header class="header" id="header">
-            <nav class="nav container">
-                <a href="#" class="nav__logo">
-                   <!-- <img src="assets/img/logo.png" alt="">-->
-                </a>
+    <p>
+        public static List<Televizio> TeleviziokListazasa()
+            {
+            try
+            {
+            parancs.Parameters.Clear();
+            parancs.CommandText = "SELECT * FROM [ElektronikaiCikk] INNER JOIN [Televizio] ON [ElektronikaiCikk].[Id] =
+            [Televizio].[Id]";
+            List<Televizio> televiziok = new List<Televizio>();
 
-                <div class="nav__menu" id="nav-menu">
-                    <ul class="nav__list">
-                        <li class="nav__item">
-                            <a href="#home" class="nav__link active-link">Home</a>
-                        </li>
-                        <li class="nav__item">
-                            <a href="#specs" class="nav__link">Zenék</a>
-                        </li>
-                        <li class="nav__item">
-                            <a href="#case" class="nav__link">Lorem ipsum 1</a>
-                        </li>
-                        <li class="nav__item">
-                            <a href="#products" class="nav__link">Lorem ipsum 2</a>
-                        </li>
-                    </ul>
+                    using (SqlDataReader olvaso = parancs.ExecuteReader())
+                    {
+                    while (olvaso.Read())
+                    {
+                    televiziok.Add(new Televizio((KijelzoTechnologia)(int)olvaso["KijelzoTechnologia"],
+                    (int)olvaso["Kepatlo"], (int)olvaso["Id"], olvaso["Gyarto"].ToString(), olvaso["Tipus"].ToString(),
+                    (int)olvaso["Fogyasztas"], (int)olvaso["Ar"], (int)olvaso["KiadasEve"]));
+                    }
 
-                    <div class="nav__close" id="nav-close">
-                        <i class="ri-close-line"></i>
-                    </div>
-                </div>
+                    olvaso.Close();
+                    }
 
-                <div class="nav__toggle" id="nav-toggle">
-                    <i class="ri-function-line"></i>
-                </div>
-            </nav>
-        </header>
+                    return televiziok;
+                    }
+                    catch (Exception ex)
+                    {
+                    throw new ABKivetel("Sikertelen televizio kilistazas!", ex);
+                    }
+                    }
+    </p>
 
-        <main class="main">
-            <!--=============== HOME ===============-->
-            <section class="home section" id="home">
-                <div class="home__container container grid">
-                    <div>
-                        <img src="assets/img/home.png" alt="" class="home__img">
-                    </div>
-                    
-                    <div class="home__data">
-                        <div class="home__header">
-                            <h1 class="home__title">Thaibi</h1>
-                            <h2 class="home__subtitle">Lorem ipsum</h2>
-                        </div>
+    <p>
+        public static void TelevizioFelvitele(Televizio televizio)
+        {
+        try
+        {
+        parancs.Parameters.Clear();
+        parancs.CommandText = "INSERT INTO [ElektronikaiCikk]([Gyarto], [Tipus], [Fogyasztas], [Ar], [KiadasEve]) OUTPUT
+        INSERTED.Id VALUES (@gyarto, @tipus, @fogyasztas, @ar, @kiadasEve)";
+        parancs.Parameters.AddWithValue("@gyarto", televizio.Gyarto);
+        parancs.Parameters.AddWithValue("@tipus", televizio.Tipus);
+        parancs.Parameters.AddWithValue("@fogyasztas", televizio.Fogyasztas);
+        parancs.Parameters.AddWithValue("@ar", televizio.Ar);
+        parancs.Parameters.AddWithValue("@kiadasEve", televizio.KiadasEve);
 
-                        <div class="home__footer">
-                            <h3 class="home__title-description">Overview</h3>
-                            <p class="home__description">
-                                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
-                                Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-                            </p>
-                            <a href="#" class="button button--flex">
-                                <span class="button--flex">
-                                    <!--
-                                    <i class="ri-shopping-bag-line button__icon"></i></i> Add to Bag
-                                </span>
-                                <span class="home__price">$299</span>
-                                -->
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </section>
-            
-            <!--=============== SPONSOR ===============-->
-            <section class="sponsor section">
-                <div class="sponsor__container container grid">
-                    <img src="assets/img/sponsor1.png" alt="" class="sponsor__img">
-                    <img src="assets/img/sponsor2.png" alt="" class="sponsor__img">
-                    <img src="assets/img/sponsor3.png" alt="" class="sponsor__img">
-                    <img src="assets/img/sponsor4.png" alt="" class="sponsor__img">
-                </div>
-            </section>
+        televizio.Id = (int)parancs.ExecuteScalar();
 
-            <!--=============== SPECS ===============-->
-            <section class="specs section grid" id="specs">
-                <h2 class="section__title section__title-gradient">Zenék</h2>
+        parancs.Parameters.Clear();
+        parancs.CommandText = "INSERT INTO [Televizio] VALUES (@id, @kijelzoTechnologia, @kepatlo)";
+        parancs.Parameters.AddWithValue("@id", televizio.Id);
+        parancs.Parameters.AddWithValue("@kijelzoTechnologia", televizio.KijelzoTechnologia);
+        parancs.Parameters.AddWithValue("@kepatlo", televizio.Kepatlo);
 
-                <div class="specs__container container grid">
-                    <div class="specs__content grid">
-                        <div class="specs__data">
-                            <!--<i class="ri-bluetooth-line specs__icon"></i>-->
-                            <h3 class="specs__title">Lorem ipsum</h3>
-                            <span class="specs__subtitle">Lorem ipsum</span>
-                        </div>
-    
-                        <div class="specs__data">
-                            <!--<i class="ri-battery-charge-line specs__icon"></i>-->
-                            <h3 class="specs__title">Lorem ipsum</h3>
-                            <span class="specs__subtitle">Lorem ipsum</span>
-                        </div>
-    
-                        <div class="specs__data">
-                            <!--<i class="ri-plug-line specs__icon"></i>-->
-                            <h3 class="specs__title">Lorem ipsum</h3>
-                            <span class="specs__subtitle">Lorem ipsum</span>
-                        </div>
-    
-                        <div class="specs__data">
-                            <!--<i class="ri-mic-line specs__icon"></i>-->
-                            <h3 class="specs__title">Lorem ipsum</h3>
-                            <span class="specs__subtitle">Lorem ipsum</span>
-                        </div>
-                    </div>
-                    
-                    <div>
-                        <img src="assets/img/specs.png" alt="" class="specs__img">
-                    </div>
-                </div>
-            </section>
+        parancs.ExecuteNonQuery();
+        }
+        catch (Exception ex)
+        {
+        throw new ABKivetel("Sikertelen televizio felvitel!", ex);
+        }
+        }
+    </p>
 
-            <!--=============== CASE ===============-->
-            <section class="case section grid" id="case">
-                <h2 class="section__title section__title-gradient">Lorem ipsum 1</h2>
+    <p>
+        public static void TelevizioModositasa(Televizio televizio)
+        {
+        try
+        {
+        parancs.Parameters.Clear();
+        parancs.CommandText = "UPDATE [ElektronikaiCikk] SET [Ar] = @ar WHERE [Id] = @id";
+        parancs.Parameters.AddWithValue("@ar", televizio.Ar);
+        parancs.Parameters.AddWithValue("@id", televizio.Id);
+        parancs.ExecuteNonQuery();
+        }
+        catch (Exception ex)
+        {
+        throw new ABKivetel("Sikertelen televizio modositas!", ex);
+        }
+        }
+    </p>
 
-                <div class="case__container container grid">
-                    <div>
-                        <img src="assets/img/case.png" alt="" class="case__img">
-                    </div>
+    <p>
+        public static void TelevizioTorlese(Televizio televizio)
+        {
+            try
+            {
+                //Eloszor onnan torlok ahol az FK van
+                parancs.Parameters.Clear();
+                parancs.CommandText = "DELETE FROM [Televizio] WHERE [Id] = @id";
+                parancs.Parameters.AddWithValue("@id", televizio.Id);
+                parancs.ExecuteNonQuery();
 
-                    <div class="case__data">
-                        <p class="case__description">
-                            Lorem ipsum dolor sit amet, consectetur adipiscing elit, 
-                            sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
-                        </p>
-                        <a href="#" class="button button--flex">
-                            <i class="ri-information-line button__icon"></i> Info
-                        </a>
-                    </div>
-                </div>
-            </section>
+                //Utana onnan torlok ahova az FK mutatott
+                parancs.Parameters.Clear();
+                parancs.CommandText = "DELETE FROM [ElektronikaiCikk] WHERE [Id] = @id";
+                parancs.Parameters.AddWithValue("@id", televizio.Id);
+                parancs.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                throw new ABKivetel("Sikertelen televizio torles!", ex);
+            }
+        }
+    </p>
 
-            <!--=============== DISCOUNT ===============-->
-            <section class="discount section">
-                <div class="discount__container container grid">
-                    <div class="discount__animate">
-                        <h2 class="discount__title">Lorem ipsum dolor sit amet <br> consectetur adipiscing elit</h2>
-                        <p class="discount__description">sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
-                        <a href="#" class="button button--flex">
-                            <!--<i class="ri-shopping-bag-line button__icon"></i>--> Song
-                        </a>
-                    </div>
+<p>
+    public static void TelevizioTorlese(int id)
+        {
+            try
+            {
+                //Eloszor onnan torlok ahol az FK van
+                parancs.Parameters.Clear();
+                parancs.CommandText = "DELETE FROM [Televizio] WHERE [Id] = @id";
+                parancs.Parameters.AddWithValue("@id", id);
+                parancs.ExecuteNonQuery();
 
-                    <img src="assets/img/discount.png" alt="" class="discount__img">
-                </div>
-            </section>
+                //Utana onnan torlok ahova az FK mutatott
+                parancs.Parameters.Clear();
+                parancs.CommandText = "DELETE FROM [ElektronikaiCikk] WHERE [Id] = @id";
+                parancs.Parameters.AddWithValue("@id", id);
+                parancs.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                throw new ABKivetel("Sikertelen televizio torles!", ex);
+            }
+        }
+</p>
 
-            <!--=============== PRODUCTS ===============-->
-            <section class="products section" id="products">
-                <h2 class="section__title section__title-gradient products__line">
-                    Lorem <br> ipsum
-                </h2>
+<h3>form</h3> 
+<p>
+    public partial class frm_ElektronikaiCikkek : Form
+    {
+        #region Adattagok
+        private List<Televizio> televiziok;
+        private List<Projektor> projektorok;
+        #endregion
 
-                <div class="products__container container grid">
-                    <article class="products__card">
-                        <div class="products__content">
-                            <img src="assets/img/product1.png" alt="" class="products__img">
-    
-                            <h3 class="products__title">Lorem</h3>
-                            <span class="products__price">ipsum</span>
-    
-                            <!--<button class="button button--flex products__button">
-                                <i class="ri-shopping-bag-line button__icon"></i>
-                            </button>-->
-                        </div>
-                    </article>
-                    <article class="products__card">
-                        <div class="products__content">
-                            <img src="assets/img/product1.png" alt="" class="products__img">
-    
-                            <h3 class="products__title">Lorem</h3>
-                            <span class="products__price">ipsum</span>
-    
-                            <!--<button class="button button--flex products__button">
-                                <i class="ri-shopping-bag-line button__icon"></i>
-                            </button>-->
-                        </div>
-                    </article>
-                    <article class="products__card">
-                        <div class="products__content">
-                            <img src="assets/img/product1.png" alt="" class="products__img">
-    
-                            <h3 class="products__title">Lorem</h3>
-                            <span class="products__price">ipsum</span>
-    
-                            <!--<button class="button button--flex products__button">
-                                <i class="ri-shopping-bag-line button__icon"></i>
-                            </button>-->
-                        </div>
-                    </article>
-                    <article class="products__card">
-                        <div class="products__content">
-                            <img src="assets/img/product1.png" alt="" class="products__img">
-    
-                            <h3 class="products__title">Lorem</h3>
-                            <span class="products__price">ipsum</span>
-    
-                            <!-- <button class="button button--flex products__button">
-                               <i class="ri-shopping-bag-line button__icon"></i>
-                            </button>-->
-                        </div>
-                    </article>
+        #region Konstruktor
+        public frm_ElektronikaiCikkek()
+        {
+            InitializeComponent();
+            ABKezelo.Csatlakozas();
 
-                    <article class="products__card">
-                        <div class="products__content">
-                            <img src="assets/img/product1.png" alt="" class="products__img">
-    
-                            <h3 class="products__title">Lorem</h3>
-                            <span class="products__price">ipsum</span>
-    
-                             <!--<button class="button button--flex products__button">
-                               <i class="ri-shopping-bag-line button__icon"></i>
-                            </button>-->
-                        </div>
-                    </article>
-                </div>
-            </section>
-        </main>
+            try
+            {
+                TeleviziokFrissitese();
+                ProjektorokFrissitese();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Hiba", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+</p>
+<p>
+    public void TeleviziokFrissitese()
+    {
+        televiziok = null;
+        televiziok = ABKezelo.TeleviziokListazasa();
 
-        <!--=============== FOOTER ===============-->
-        <footer class="footer section">
-            <div class="footer__container container grid">
-                <a href="#" class="footer__logo">
-                    <!--<img src="assets/img/logo.png" alt="">-->
-                </a>
-    
-                <div class="footer__content">
-                    <h3 class="footer__title">Lorem ipsum</h3>
-    
-                    <ul class="footer__links">
-                        <li>
-                            <a href="#" class="footer__link">Lorem ipsum</a>
-                        </li>
-                        <li>
-                            <a href="#" class="footer__link">Lorem ipsum</a>
-                        </li>
-                        <li>
-                            <a href="#" class="footer__link">Lorem ipsum</a>
-                        </li>
-                        <li>
-                            <a href="#" class="footer__link">Lorem ipsum</a>
-                        </li>
-                    </ul>
-                </div>
-    
-                <div class="footer__content">
-                    <h3 class="footer__title">Lorem ipsum</h3>
-    
-                    <ul class="footer__links">
-                        <li>
-                            <a href="#" class="footer__link">Lorem ipsum</a>
-                        </li>
-                        <li>
-                            <a href="#" class="footer__link">Lorem ipsum</a>
-                        </li>
-                        <li>
-                            <a href="#" class="footer__link">Lorem ipsum</a>
-                        </li>
-                        <li>
-                            <a href="#" class="footer__link">Lorem ipsum</a>
-                        </li>
-                    </ul>
-                </div>
-    
-                <div class="footer__content">
-                    <form action="" class="footer__form">
-                        <input type="email" placeholder="Email" class="footer__input">
-                        <button class="button button--flex">
-                            <i class="ri-send-plane-line button__icon"></i> Subscribe
-                        </button>
-                    </form>
-    
-                    <div class="footer__social">
-                        <a href="https://www.facebook.com/" target="_blank" class="footer__social-link">
-                            <i class="ri-facebook-fill"></i>
-                        </a>
-                        <a href="https://www.instagram.com/" target="_blank" class="footer__social-link">
-                            <i class="ri-instagram-line"></i>
-                        </a>
-                        <a href="https://twitter.com/" target="_blank" class="footer__social-link">
-                            <i class="ri-twitter-line"></i>
-                        </a>
-                        <a href="https://www.youtube.com" target="_blank" class="footer__social-link">
-                            <i class="ri-youtube-line"></i>
-                        </a>
-                    </div>
-                </div>
-            </div>
+        lb_Televiziok.DataSource = null;
+        lb_Televiziok.DataSource = televiziok;
+    }
+</p>
+<p>
+    private void frm_ElektronikaiCikkek_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            ABKezelo.Lecsatlakozas();
+        }
+</p>
+<p>
+    private void bt_UjTv_Click(object sender, EventArgs e)
+        {
+            frm_TelevizioUrlap frm = new frm_TelevizioUrlap();
+            if (frm.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    ABKezelo.TelevizioFelvitele(frm.Televizio);
+                    TeleviziokFrissitese();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message, "Hiba", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+</p>
+<p>
+    private void bt_Torol_Click(object sender, EventArgs e)
+        {
+            if (lb_Televiziok.SelectedIndex != -1)
+            {
+                if (MessageBox.Show("Biztos torli a televiziot?", "Torles", MessageBoxButtons.OKCancel, MessageBoxIcon.Question) == DialogResult.OK)
+                {
+                    try
+                    {
+                        Televizio televizio = (Televizio)lb_Televiziok.SelectedItem;
+                        ABKezelo.TelevizioTorlese(televizio);
+                        TeleviziokFrissitese();
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.Message, "Hiba", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
+            else
+            {
+                MessageBox.Show("Jeloljon ki egy televiziot!", "Hiba", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+</p>
+<p>
+    private void bt_TvModosit_Click(object sender, EventArgs e)
+        {
+            if (lb_Televiziok.SelectedIndex != -1)
+            {
+                Televizio televizio = (Televizio)lb_Televiziok.SelectedItem;
+                frm_TelevizioUrlap frm = new frm_TelevizioUrlap(televizio);
+                if (frm.ShowDialog() == DialogResult.OK)
+                {
+                    try
+                    {
+                        ABKezelo.TelevizioModositasa(frm.Televizio);
+                        TeleviziokFrissitese();
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.Message, "Hiba", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
+            else
+            {
+                MessageBox.Show("Jeloljon ki egy televiziot!", "Hiba", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+</p>
+<h3>urlap</h3>
+<p>
+    public frm_TelevizioUrlap()
+    {
+        InitializeComponent();
+        cb_Kijelzo.DataSource = Enum.GetValues(typeof(KijelzoTechnologia));
+        nud_KiadasEve.Maximum = DateTime.Now.Year;
+    }
+</p>
+<p>
+    public frm_TelevizioUrlap(Televizio televizio) : this()
+    {
+        this.televizio = televizio;
 
-            <p class="footer__copy">
-                <a href="https://www.youtube.com" target="_blank" class="footer__copy-link">&#169; Peter B. All right reserved</a>
-            </p>
-        </footer>
+        tb_Gyarto.Text = televizio.Gyarto;
+        tb_Tipus.Text = televizio.Tipus;
+        nud_Fogyasztas.Value = televizio.Fogyasztas;
+        nud_Ar.Value = televizio.Ar;
+        nud_KiadasEve.Value = televizio.KiadasEve;
+        cb_Kijelzo.SelectedItem = televizio.KijelzoTechnologia;
+        nud_Kepatlo.Value = televizio.Kepatlo;
 
-        <!--=============== SCROLL UP ===============-->
-        <a href="#" class="scrollup" id="scroll-up">
-            <i class="ri-arrow-up-s-line scrollup__icon"></i>
-        </a>
-        
-        <!--=============== SCROLL REVEAL ===============-->
-        <script src="https://unpkg.com/scrollreveal"></script>
+        tb_Gyarto.Enabled = false;
+        tb_Tipus.Enabled = false;
+        nud_Fogyasztas.Enabled = false;
+        nud_KiadasEve.Enabled = false;
+        cb_Kijelzo.Enabled = false;
+        nud_Kepatlo.Enabled = false;
+    }
+</p>
+<p>
+    private void bt_Ok_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            if (televizio == null)
+            {
+                televizio = new Televizio((KijelzoTechnologia)cb_Kijelzo.SelectedItem, (int)nud_Kepatlo.Value, tb_Gyarto.Text, tb_Tipus.Text, (int)nud_Fogyasztas.Value, (int)nud_Ar.Value, (int)nud_KiadasEve.Value);
+            }
+            else
+            {
+                televizio.Ar = (int)nud_Ar.Value;
+            }
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(ex.Message, "Hiba", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            DialogResult = DialogResult.None;
+        }
+    }
+</p>
+<p>
+    public Televizio Televizio { get => televizio; }
+</p>
+</body>
 
-        <!--=============== MAIN JS ===============-->
-        <script src="assets/js/main.js"></script>
-    </body>
 </html>
